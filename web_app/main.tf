@@ -23,8 +23,8 @@ resource "azurerm_resource_group" "app_grp"{
   location=local.location
 }
 
-resource "azurerm_service_plan" "app_plan_erictest" {
-  name                = "app-plan-erictestwest"
+resource "azurerm_service_plan" "app_plan_linux" {
+  name                = "app-plan-erictestlinux"
   location            = azurerm_resource_group.app_grp.location
   resource_group_name = azurerm_resource_group.app_grp.name
 
@@ -35,14 +35,38 @@ resource "azurerm_service_plan" "app_plan_erictest" {
   ]
 }
 
-resource "azurerm_linux_web_app" "webapp" {
-  name                = "testwebapperic23555"
+resource "azurerm_service_plan" "app_plan_windows" {
+  name                = "app-plan-erictestwindows"
   location            = azurerm_resource_group.app_grp.location
   resource_group_name = azurerm_resource_group.app_grp.name
-  service_plan_id = azurerm_service_plan.app_plan_erictest.id
+
+  os_type             = "Windows"
+  sku_name            = "B1"
+  depends_on = [
+    azurerm_resource_group.app_grp
+  ]
+}
+
+resource "azurerm_linux_web_app" "webapp" {
+  name                = "testwebappericlinux"
+  location            = azurerm_resource_group.app_grp.location
+  resource_group_name = azurerm_resource_group.app_grp.name
+  service_plan_id = azurerm_service_plan.app_plan_linux.id
 
   site_config {}
   depends_on = [
-    azurerm_service_plan.app_plan_erictest
+    azurerm_service_plan.app_plan_linux
+    ]
+}
+
+resource "azurerm_windows_web_app" "webappwindows" {
+  name                = "testwebappericwindows"
+  location            = azurerm_resource_group.app_grp.location
+  resource_group_name = azurerm_resource_group.app_grp.name
+  service_plan_id = azurerm_service_plan.app_plan_windows.id
+
+  site_config {}
+  depends_on = [
+    azurerm_service_plan.app_plan_windows
   ]
 }
