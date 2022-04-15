@@ -55,3 +55,12 @@ resource "azurerm_mssql_firewall_rule" "app_server_firewall_rule" {
     azurerm_mssql_server.app_server
   ]
 }
+
+resource "null_resource" "database_setup" {
+  provisioner "local-exec" {
+      command = "sqlcmd -S appsqlsvr231.database.windows.net -U sqladmin -P Azure@123 -d appdb -i init.sql"
+  }
+  depends_on=[
+    azurerm_mssql_server.app_server
+  ]
+}
