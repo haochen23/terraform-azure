@@ -253,12 +253,14 @@ resource "azurerm_public_ip" "lb_ip" {
   location            = azurerm_resource_group.app_grp.location
   resource_group_name = azurerm_resource_group.app_grp.name
   allocation_method   = "Static"
+  sku = "Standard"
 }
 
 resource "azurerm_lb" "lb" {
   name                = "TestLoadBalancer"
   location            = azurerm_resource_group.app_grp.location
   resource_group_name = azurerm_resource_group.app_grp.name
+  sku = "Standard"
 
   frontend_ip_configuration {
     name                 = "lb-front-ip"
@@ -302,6 +304,9 @@ resource "azurerm_lb_probe" "probeA" {
   loadbalancer_id = azurerm_lb.lb.id
   name            = "port-80-probe"
   port            = 80
+  depends_on = [
+    azurerm_lb.lb
+  ]
 }
 
 resource "azurerm_lb_rule" "lb_ruleA" {
@@ -311,4 +316,10 @@ resource "azurerm_lb_rule" "lb_ruleA" {
   frontend_port                  = 80
   backend_port                   = 80
   frontend_ip_configuration_name = "lb-front-ip"
+  backend_address_pool_ids = [azurerm_lb_backend_address_pool.backend_pool.id]
+  probe_id = azurerm_lb_probe.probeA.id
+  depends_on = [
+    azurerm_lb.lb,
+    azurerm_lb_probe.probeA
+  ]
 }
