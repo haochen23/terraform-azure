@@ -247,3 +247,68 @@ resource "azurerm_subnet_network_security_group_association" "nsg_association" {
     azurerm_network_security_group.app_nsg
   ]
 }
+
+resource "azurerm_public_ip" "lb_ip" {
+  name                = "lb_ip"
+  location            = azurerm_resource_group.app_grp.location
+  resource_group_name = azurerm_resource_group.app_grp.name
+  allocation_method   = "Static"
+}
+
+resource "azurerm_lb" "lb" {
+  name                = "TestLoadBalancer"
+  location            = azurerm_resource_group.app_grp.location
+  resource_group_name = azurerm_resource_group.app_grp.name
+
+  frontend_ip_configuration {
+    name                 = "lb-front-ip"
+    public_ip_address_id = azurerm_public_ip.lb_ip.id
+  }
+
+  depends_on = [
+    azurerm_public_ip.lb_ip
+  ]
+}
+
+resource "azurerm_lb_backend_address_pool" "backend_pool" {
+  loadbalancer_id = azurerm_lb.lb.id
+  name            = "BackEndAddressPool"
+  depends_on = [
+    azurerm_lb.lb
+  ]
+}
+
+resource "azurerm_lb_backend_address_pool_address" "appvm1_addr" {
+  name                    = "appvm1"
+  backend_address_pool_id = azurerm_lb_backend_address_pool.backend_pool.id
+  virtual_network_id      = azurerm_virtual_network.app_network.id
+  ip_address              = azurerm_network_interface.app_interface1.private_ip_address
+  depends_on = [
+    azurerm_lb_backend_address_pool.backend_pool
+  ]
+}
+
+resource "azurerm_lb_backend_address_pool_address" "appvm2_addr" {
+  name                    = "appvm2"
+  backend_address_pool_id = azurerm_lb_backend_address_pool.backend_pool.id
+  virtual_network_id      = azurerm_virtual_network.app_network.id
+  ip_address              = azurerm_network_interface.app_interface2.private_ip_address
+  depends_on = [
+    azurerm_lb_backend_address_pool.backend_pool
+  ]
+}
+
+resource "azurerm_lb_probe" "probeA" {
+  loadbalancer_id = azurerm_lb.lb.id
+  name            = "port-80-probe"
+  port            = 80
+}
+
+resource "azurerm_lb_rule" "lb_ruleA" {
+  loadbalancer_id                = azurerm_lb.lb.id
+  name                           = "LBRule"
+  protocol                       = "Tcp"
+  frontend_port                  = 80
+  backend_port                   = 80
+  frontend_ip_configuration_name = "lb-front-ip"
+}
