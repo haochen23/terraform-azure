@@ -29,14 +29,14 @@ resource "azurerm_service_plan" "primary_plan" {
   location            = "North Europe"
   resource_group_name = azurerm_resource_group.app_grp.name
 
-  os_type             = "Windows"
+  os_type             = "Linux"
   sku_name            = "S1"
   depends_on = [
     azurerm_resource_group.app_grp
   ]
 }
 
-resource "azurerm_windows_web_app" "primary_webapp" {
+resource "azurerm_linux_web_app" "primary_webapp" {
   name                = "primaryapp1000321"
   location            = "North Europe"
   resource_group_name = azurerm_resource_group.app_grp.name
@@ -44,8 +44,7 @@ resource "azurerm_windows_web_app" "primary_webapp" {
 
   site_config {    
     application_stack {
-        current_stack = "node"
-        node_version = "14-LTS"
+        node_version = "14-lts"
     }
   }
 
@@ -55,7 +54,7 @@ resource "azurerm_windows_web_app" "primary_webapp" {
 }
 
 resource "azurerm_app_service_source_control" "primary_source" {
-  app_id   = azurerm_windows_web_app.primary_webapp.id
+  app_id   = azurerm_linux_web_app.primary_webapp.id
   repo_url = "https://github.com/haochen23/demoApp1"
   branch   = "master"
 }
@@ -65,14 +64,14 @@ resource "azurerm_service_plan" "secondary_plan" {
   location            = "UK South"
   resource_group_name = azurerm_resource_group.app_grp.name
 
-  os_type             = "Windows"
+  os_type             = "Linux"
   sku_name            = "S1"
   depends_on = [
     azurerm_resource_group.app_grp
   ]
 }
 
-resource "azurerm_windows_web_app" "secondary_webapp" {
+resource "azurerm_linux_web_app" "secondary_webapp" {
   name                = "secondaryapp1000321"
   location            = "UK South"
   resource_group_name = azurerm_resource_group.app_grp.name
@@ -80,8 +79,7 @@ resource "azurerm_windows_web_app" "secondary_webapp" {
 
   site_config {    
     application_stack {
-        current_stack = "node"
-        node_version = "14-LTS"
+        node_version = "14-lts"
     }
   }
   depends_on = [
@@ -90,7 +88,7 @@ resource "azurerm_windows_web_app" "secondary_webapp" {
 }
 
 resource "azurerm_app_service_source_control" "secondary_source" {
-  app_id   = azurerm_windows_web_app.secondary_webapp.id
+  app_id   = azurerm_linux_web_app.secondary_webapp.id
   repo_url = "https://github.com/haochen23/demoApp2"
   branch   = "master"
 }
@@ -121,7 +119,7 @@ resource "azurerm_traffic_manager_azure_endpoint" "primary_endpoint" {
   profile_id         = azurerm_traffic_manager_profile.traffic_profile.id
   priority           = 1
   weight             = 100
-  target_resource_id = azurerm_windows_web_app.primary_webapp.id
+  target_resource_id = azurerm_linux_web_app.primary_webapp.id
 }
 
 
@@ -130,5 +128,5 @@ resource "azurerm_traffic_manager_azure_endpoint" "secondary_endpoint" {
   profile_id         = azurerm_traffic_manager_profile.traffic_profile.id
   priority           = 2
   weight             = 100
-  target_resource_id = azurerm_windows_web_app.secondary_webapp.id
+  target_resource_id = azurerm_linux_web_app.secondary_webapp.id
 }
