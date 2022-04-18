@@ -6,4 +6,4 @@ requirement:
 
 ## simple diagram
 
-![architecture](https://github.com/haochen23/terraform-azure/blob/masterimages/Blank%20diagram.png?raw=true)
+![architecture](https://github.com/haochen23/terraform-azure/blob/master/images/Blank%20diagram.png?raw=true)
